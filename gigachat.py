@@ -23,7 +23,7 @@ def get_access_token() -> str:
     'Content-Type': 'application/x-www-form-urlencoded',
     'Accept': 'application/json',
     'RqUID': f'{new_uuid}',
-    'Authorization': f'Basic {os.getenv('AUTHORIATION')}'
+    'Authorization': f'Basic {os.getenv('GIGACHAT_AUTHORIATION')}'
     }
     response = requests.request("POST", url, headers=headers, data=payload, verify=False)
     response_json = response.json()
@@ -62,11 +62,12 @@ def gigachat_answer(prompt: str) -> str:
     'Accept': 'application/json',
     'Authorization': f'Bearer {access_token}'
     }
-    response = requests.request("POST", url, headers=headers, data=payload, verify=False)
-    if response.status_code == 401:
-        return 'jopa'
-    else:
+    try:
+        response = requests.request("POST", url, headers=headers, data=payload, verify=False)
         response_json = response.json()
         result = response_json['choices'][0]['message']['content']
+        return result
+    except Exception as e:
+        result = str(e)
         return result
     
