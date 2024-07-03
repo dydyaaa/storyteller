@@ -18,5 +18,6 @@ def make_prompt(city, genre, symbols, weather):
               f"Температура: {weather['temp']} градусов. "
               f"Облачность: {weather['main']}. "
               f"Скорость ветра: {weather['wind_speed']} м/с. "
-              f"Ответь на русском языке.")
+              f"Ответь на русском языке."
+              f"Твой рассказ должен быть законченым.")
     return prompt

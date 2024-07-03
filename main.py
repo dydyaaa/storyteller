@@ -1,4 +1,8 @@
-import geocoding, weather, prompt, gigachat, yandexgpt
+import src.geocoding
+import src.weather
+import src.prompt
+import src.gigachat
+import src.yandexgpt
 import threading, time, os
 
 def get_city() -> str:
@@ -53,31 +57,53 @@ def create_answers_directory():
     if not os.path.exists('answers'):
         os.makedirs('answers')
 
+folder_path = 'answers'
+
 def fetch_gigachat_content(prompt_: str):
     """
     Запрашивает ответ у модели Gigachat и сохраняет его в файл 'gigachat_output.txt'.
     Также выводит время выполнения запроса.
     """
-    filename = 'answers/gigachat_output.txt'
     start = time.time() # Засекаем время начала выполнения запроса
-    gigachat_content = gigachat.gigachat_answer(prompt_) # Получаем ответ от модели
+    gigachat_content = src.gigachat.gigachat_answer(prompt_) # Получаем ответ от модели
     stop = time.time() # Засекаем время окончания выполнения запроса
-    with open('gigachat_output.txt', 'w', encoding='utf-8') as file:
+
+    files = os.listdir(folder_path)
+    answer_files = [f for f in files if f.startswith('gigachat_output_')]
+
+    if answer_files:
+        # Находим имя последнего файла и формируем новое
+        last_file = max(answer_files) 
+        last_file = f'{last_file[:-5]}{(int(last_file[-5]) + 1)}{last_file[-4:]}'
+    else:
+        last_file = 'gigachat_output_1.txt'
+    
+    with open(f'{folder_path}/{last_file}', 'w', encoding='utf-8') as file:
         file.write(gigachat_content)
-    print(f'Модель Gigachat\nВремя ответа: {stop - start}\nОтвет записан в файл {filename}')
+    print(f'Модель Gigachat\nВремя ответа: {round((stop - start), 2)} сек.\nОтвет записан в файл {last_file}')
 
 def fetch_yandexgpt_content(prompt_: str):
     """
     Запрашивает ответ у модели YandexGPT и сохраняет его в файл 'yandexgpt_output.txt'.
     Также выводит время выполнения запроса.
     """
-    filename = 'answers/yandexgpt_output.txt'
     start = time.time() # Засекаем время начала выполнения запроса
-    yandexgpt_content = yandexgpt.yandexgpt_answer(prompt_) # Получаем ответ от модели
+    yandexgpt_content = src.yandexgpt.yandexgpt_answer(prompt_) # Получаем ответ от модели
     stop = time.time() # Засекаем время окончания выполнения запроса
-    with open(filename, 'w', encoding='utf-8') as file:
+
+    files = os.listdir(folder_path)
+    answer_files = [f for f in files if f.startswith('yandexgpt_output_')]
+
+    if answer_files:
+        # Находим имя последнего файла и формируем новое
+        last_file = max(answer_files)
+        last_file = f'{last_file[:-5]}{(int(last_file[-5]) + 1)}{last_file[-4:]}'
+    else:
+        last_file = 'yandexgpt_output_1.txt'
+    
+    with open(f'{folder_path}/{last_file}', 'w', encoding='utf-8') as file:
         file.write(yandexgpt_content)
-    print(f'Модель YandexGPT\nВремя ответа: {stop - start}\nОтвет записан в файл {filename}')
+    print(f'Модель YandexGPT\nВремя ответа: {round((stop - start), 2)} сек.\nОтвет записан в файл {last_file}')
 
 def main():
     create_answers_directory()
@@ -90,12 +116,12 @@ def main():
         
         print('Пожалуйста, подождите. Ответ генерируется.')
 
-        coord = geocoding.geocoding(city)
+        coord = src.geocoding.geocoding(city)
         if coord == 'Город не найден':
             return 'Город не найден.'
         
-        weather_ = weather.get_weather(coord)
-        prompt_ = prompt.make_prompt(city, genre, simbols, weather_)
+        weather_ = src.weather.get_weather(coord)
+        prompt_ = src.prompt.make_prompt(city, genre, simbols, weather_)
         
         # Создаем два потока для параллельного запроса в две модели
         thread1 = threading.Thread(target=fetch_gigachat_content, args=(prompt_,))
