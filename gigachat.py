@@ -23,7 +23,7 @@ def get_access_token() -> str:
     'Content-Type': 'application/x-www-form-urlencoded',
     'Accept': 'application/json',
     'RqUID': f'{new_uuid}',
-    'Authorization': f'Basic {os.getenv('GIGACHAT_AUTHORIATION')}'
+    'Authorization': f'Basic {os.getenv("GIGACHAT_AUTHORIATION")}'
     }
     response = requests.request("POST", url, headers=headers, data=payload, verify=False)
     response_json = response.json()
